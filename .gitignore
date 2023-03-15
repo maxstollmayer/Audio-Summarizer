@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# test files
+test_de.m4a
+test_en.m4a
+test_de.txt
+test_en.txt
