@@ -8,4 +8,8 @@ Clone the repository and install from inside the folder using `pip install .`. M
 
 ## Usage
 
- You can now use `summarize --audio <path> --out <path>` to summarize the speech of an audio file (<25MB) and log the transcript and summary to an output file. For more options see `summarize --help`.
+You can now use `summarize --audio <path> --out <path>` to summarize the speech of an audio file (<25MB) and log the transcript and summary to an output file. For more options see `summarize --help`.
+
+## Development Setup
+
+Create virtual environment, activate it and install development requirements `python -m pip install -r requirements.txt`. Inside the folder install using `python -m pip install --editable .`.
