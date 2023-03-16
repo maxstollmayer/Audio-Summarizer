@@ -95,7 +95,7 @@ def main(
     summarize_only: bool,
 ) -> None:
     """
-    Entry point of the CLI tool. For usage run `python -m audio_summarizer.py --help`.
+    Summarize the spoken content of an audio file.
     """
     if key is not None:
         openai.api_key_path = key
