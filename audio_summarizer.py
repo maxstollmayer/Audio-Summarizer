@@ -109,10 +109,10 @@ def main(
         transcript = transcribe(audio)
         end_time = time.time()
         seconds = round(end_time - start_time, 2)
-        print(f"finished in {seconds} seconds.", end=" ", flush=True)
+        print(f"finished in {seconds} seconds", end=" ", flush=True)
         if out is not None:
             write_output(out, audio, transcript, "Transcript")
-            print(f"Saved to file {out}.")
+            print(f"and saved to file {out}")
 
     if transcribe_only:
         print("\n")
@@ -123,8 +123,8 @@ def main(
         summary = summarize(transcript, lang)
         end_time = time.time()
         seconds = round(end_time - start_time, 2)
-        print(f" finished in {seconds} seconds.", end=" ", flush=True)
+        print(f"finished in {seconds} seconds", end=" ", flush=True)
         if out is not None:
             write_output(out, audio, summary, "Summary")
-            print(f"Saved to file {out}.\n")
+            print(f"and saved to file {out}\n")
         print(summary)
