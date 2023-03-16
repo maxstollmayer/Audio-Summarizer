@@ -104,27 +104,35 @@ def main(
         with open(audio, "r", encoding="utf-8") as file:
             transcript = file.read()
     else:
-        print("Transcribing audio...", end=" ", flush=True)
+        click.echo("Transcribing audio... ", nl=False)
         start_time = time.time()
         transcript = transcribe(audio)
         end_time = time.time()
         seconds = round(end_time - start_time, 2)
-        print(f"finished in {seconds} seconds", end=" ", flush=True)
+        click.echo(f"finished in {seconds} seconds ", nl=False)
+
         if out is not None:
             write_output(out, audio, transcript, "Transcript")
-            print(f"and saved to file {out}")
+            click.echo(f"and saved to file {out}", nl=False)
 
     if transcribe_only:
-        print("\n")
-        print(transcript)
+        click.echo("")
+        click.echo("")
+        click.echo(transcript)
     else:
-        print("Summarizing transcript...", end=" ", flush=True)
+        click.echo("")
+        click.echo("Summarizing transcript... ", nl=False)
         start_time = time.time()
         summary = summarize(transcript, lang)
         end_time = time.time()
         seconds = round(end_time - start_time, 2)
-        print(f"finished in {seconds} seconds", end=" ", flush=True)
+        click.echo(f"finished in {seconds} seconds ", nl=False)
+
         if out is not None:
             write_output(out, audio, summary, "Summary")
-            print(f"and saved to file {out}\n")
-        print(summary)
+            click.echo(f"and saved to file {out}", nl=False)
+
+        click.echo("")
+        click.echo("")
+        click.echo(summary)
+        click.echo("")
