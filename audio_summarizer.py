@@ -1,3 +1,7 @@
+"""
+Simple CLI tool to transcribe and summarize an audio file.
+"""
+
 import datetime
 import time
 from typing import Optional
@@ -15,11 +19,10 @@ PROMPT = {
 }
 
 
-def authenticate(key_path: str) -> None:
-    pass
-
-
 def transcribe(audio_path: str) -> str:
+    """
+    Sends request to OpenAI's whisper STT model.
+    """
     with open(audio_path, "rb") as audio_file:
         transcript: str = openai.Audio.transcribe(STT_MODEL, audio_file).text  # type: ignore
 
@@ -27,9 +30,13 @@ def transcribe(audio_path: str) -> str:
 
 
 def summarize(transcript: str, lang: str) -> str:
+    """
+    Sends request to OpenAI's davinci text completion model.
+    Uses a different prompt depending on specified language.
+    """
     return (
         openai.Completion.create(  # type: ignore
-            model="text-davinci-003",
+            model=SUMMARY_MODEL,
             prompt=f"{PROMPT[lang]}:\n\n{transcript}",
             temperature=TEMPERATURE,
             max_tokens=MAX_TOKENS,
@@ -39,15 +46,13 @@ def summarize(transcript: str, lang: str) -> str:
     )
 
 
-def write_output(
-    out_path: str, audio_path: str, transcript: str, summary: Optional[str]
-) -> None:
+def write_output(out_path: str, audio_path: str, text: str, kind: str) -> None:
+    """
+    Writes given transcript or summary to the output file
+    with a timestamp and the location of the audio.
+    """
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    content = f"[{now}] Transcript of {audio_path}:\n{transcript}\n\n"
-
-    if summary is not None:
-        content += f"[{now}] Summary of {audio_path}:\n{summary}\n\n"
-
+    content = f"[{now}] {kind.capitalize()} of {audio_path}:\n{text}\n\n"
     with open(out_path, "a+", encoding="utf-8") as out_file:
         out_file.write(content)
 
@@ -76,35 +81,50 @@ def write_output(
 @click.option(
     "--transcribe-only", is_flag=True, help="Only transcribe and not summarize."
 )
+@click.option(
+    "--summarize-only",
+    is_flag=True,
+    help="Only summarize the text file given with '--audio'.",
+)
 def main(
     audio: str,
     out: Optional[str],
     lang: str,
     key: Optional[str],
     transcribe_only: bool,
+    summarize_only: bool,
 ) -> None:
-    summary = None
-    # authenticate(key)
+    """
+    Entry point of the CLI tool. For usage run `python -m audio_summarizer.py --help`.
+    """
+    if key is not None:
+        openai.api_key_path = key
 
-    print("Transcribing audio...", end="", flush=True)
-    start_time = time.time()
-    transcript = transcribe(audio)
-    end_time = time.time()
-    print(f" finished in {round(end_time - start_time, 2)} seconds.")
+    if summarize_only:
+        with open(audio, "r", encoding="utf-8") as file:
+            transcript = file.read()
+    else:
+        print("Transcribing audio...", end=" ", flush=True)
+        start_time = time.time()
+        transcript = transcribe(audio)
+        end_time = time.time()
+        seconds = round(end_time - start_time, 2)
+        print(f"finished in {seconds} seconds.", end=" ", flush=True)
+        if out is not None:
+            write_output(out, audio, transcript, "Transcript")
+            print(f"Saved to file {out}.")
 
-    if not transcribe_only:
-        print("Summarizing transcript...", end="", flush=True)
+    if transcribe_only:
+        print("\n")
+        print(transcript)
+    else:
+        print("Summarizing transcript...", end=" ", flush=True)
         start_time = time.time()
         summary = summarize(transcript, lang)
         end_time = time.time()
-        print(f" finished in {round(end_time - start_time, 2)} seconds.")
-
-    if out is not None:
-        print(f"Wrote to file {out}.")
-        write_output(out, audio, transcript, summary)
-
-    print("\n")
-    if transcribe_only:
-        print(transcript)
-    else:
+        seconds = round(end_time - start_time, 2)
+        print(f" finished in {seconds} seconds.", end=" ", flush=True)
+        if out is not None:
+            write_output(out, audio, summary, "Summary")
+            print(f"Saved to file {out}.\n")
         print(summary)
