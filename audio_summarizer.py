@@ -7,43 +7,9 @@ import time
 from typing import Optional
 
 import click
-import openai
 
-STT_MODEL = "whisper-1"
-SUMMARY_MODEL = "text-davinci-003"
-MAX_TOKENS = 256
-TEMPERATURE = 0.7
-PROMPT = {
-    "en": "Summarize this audio transcript in English:",
-    "de": "Fasse das folgende Audiotranskript in Deutsch zusammen:",
-}
-
-
-def transcribe(audio_path: str) -> str:
-    """
-    Sends request to OpenAI's whisper STT model.
-    """
-    with open(audio_path, "rb") as audio_file:
-        transcript: str = openai.Audio.transcribe(STT_MODEL, audio_file).text  # type: ignore
-
-    return transcript.strip()
-
-
-def summarize(transcript: str, lang: str) -> str:
-    """
-    Sends request to OpenAI's davinci text completion model.
-    Uses a different prompt depending on specified language.
-    """
-    return (
-        openai.Completion.create(  # type: ignore
-            model=SUMMARY_MODEL,
-            prompt=f"{PROMPT[lang]}:\n\n{transcript}",
-            temperature=TEMPERATURE,
-            max_tokens=MAX_TOKENS,
-        )
-        .choices[0]  # type: ignore
-        .text.strip()
-    )
+from transcribers import TRANSCRIBE
+from summarizers import SUMMARIZE
 
 
 def write_output(out_path: str, audio_path: str, text: str, kind: str) -> None:
@@ -63,13 +29,7 @@ def write_output(out_path: str, audio_path: str, text: str, kind: str) -> None:
     "--out",
     type=click.Path(),
     required=False,
-    help="Path to optional output file. (Will be created if non-existent.)",
-)
-@click.option(
-    "--key",
-    type=click.Path(),
-    required=False,
-    help="Path to API key file.",
+    help="Path to optional output file. Note that it will be created if non-existent.",
 )
 @click.option(
     "--lang",
@@ -77,6 +37,20 @@ def write_output(out_path: str, audio_path: str, text: str, kind: str) -> None:
     default="en",
     show_default=True,
     help="Language to use for the summarization.",
+)
+@click.option(
+    "--stt-model",
+    type=click.Choice(list(TRANSCRIBE.keys()), case_sensitive=False),
+    default=list(TRANSCRIBE.keys())[0],
+    show_default=True,
+    help="Model to use for the transcription. Note that Whisper requires the environment variable `OPENAI_API_KEY` to be set.",
+)
+@click.option(
+    "--summary-model",
+    type=click.Choice(list(SUMMARIZE.keys()), case_sensitive=False),
+    default=list(SUMMARIZE.keys())[0],
+    show_default=True,
+    help="Model to use for the summarization. Note that GPT3 requires the environment variable `OPENAI_API_KEY` to be set.",
 )
 @click.option(
     "--transcribe-only", is_flag=True, help="Only transcribe and not summarize."
@@ -90,15 +64,14 @@ def main(
     audio: str,
     out: Optional[str],
     lang: str,
-    key: Optional[str],
+    stt_model: str,
+    summary_model: str,
     transcribe_only: bool,
     summarize_only: bool,
 ) -> None:
     """
     Summarize the spoken content of an audio file.
     """
-    if key is not None:
-        openai.api_key_path = key
 
     if summarize_only:
         with open(audio, "r", encoding="utf-8") as file:
@@ -106,10 +79,9 @@ def main(
     else:
         click.echo("Transcribing audio... ", nl=False)
         start_time = time.time()
-        transcript = transcribe(audio)
+        transcript = TRANSCRIBE[stt_model](audio, lang)
         end_time = time.time()
-        seconds = round(end_time - start_time, 2)
-        click.echo(f"finished in {seconds} seconds ", nl=False)
+        click.echo(f"finished in {round(end_time - start_time, 2)} seconds ", nl=False)
 
         if out is not None:
             write_output(out, audio, transcript, "Transcript")
@@ -123,10 +95,9 @@ def main(
         click.echo("")
         click.echo("Summarizing transcript... ", nl=False)
         start_time = time.time()
-        summary = summarize(transcript, lang)
+        summary = SUMMARIZE[summary_model](transcript, lang)
         end_time = time.time()
-        seconds = round(end_time - start_time, 2)
-        click.echo(f"finished in {seconds} seconds ", nl=False)
+        click.echo(f"finished in {round(end_time - start_time, 2)} seconds ", nl=False)
 
         if out is not None:
             write_output(out, audio, summary, "Summary")
