@@ -1,2 +1,2 @@
-pylint
-black
+click==8.1.3
+openai==0.27.2

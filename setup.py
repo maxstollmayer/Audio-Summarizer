@@ -3,6 +3,9 @@ from setuptools import setup
 with open("README.md", encoding="utf-8") as f:
     readme = f.read()
 
+with open("requirements.txt", encoding="utf-8") as f:
+    requirements = f.read().splitlines()
+
 setup(
     name="audio-summarizer",
     version="0.1",
@@ -14,8 +17,8 @@ setup(
     url="https://github.com/maxstolly/Audio-Summarizer",
     license="Mozilla Public License Version 2.0",
     py_modules=["audio_summarizer"],
-    python_requires=">=3.9.0",
-    install_requires=["click==8.1.3", "openai==0.27.2"],
+    python_requires=">=3.9",
+    install_requires=requirements,
     entry_points="""
         [console_scripts]
         summarize=audio_summarizer:main
