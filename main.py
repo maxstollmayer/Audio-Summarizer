@@ -8,8 +8,7 @@ from typing import Optional
 
 import click
 
-from transcribers import TRANSCRIBE
-from summarizers import SUMMARIZE
+from config import TRANSCRIBERS, SUMMARIZERS
 
 
 def write_output(out_path: str, audio_path: str, text: str, kind: str) -> None:
@@ -40,15 +39,15 @@ def write_output(out_path: str, audio_path: str, text: str, kind: str) -> None:
 )
 @click.option(
     "--stt-model",
-    type=click.Choice(list(TRANSCRIBE.keys()), case_sensitive=False),
-    default=list(TRANSCRIBE.keys())[0],
+    type=click.Choice(list(TRANSCRIBERS.keys()), case_sensitive=False),
+    default=list(TRANSCRIBERS.keys())[0],
     show_default=True,
     help="Model to use for the transcription. Note that Whisper requires the environment variable `OPENAI_API_KEY` to be set.",
 )
 @click.option(
     "--summary-model",
-    type=click.Choice(list(SUMMARIZE.keys()), case_sensitive=False),
-    default=list(SUMMARIZE.keys())[0],
+    type=click.Choice(list(SUMMARIZERS.keys()), case_sensitive=False),
+    default=list(SUMMARIZERS.keys())[0],
     show_default=True,
     help="Model to use for the summarization. Note that GPT3 requires the environment variable `OPENAI_API_KEY` to be set.",
 )
@@ -79,7 +78,7 @@ def main(
     else:
         click.echo("Transcribing audio... ", nl=False)
         start_time = time.time()
-        transcript = TRANSCRIBE[stt_model](audio, lang)
+        transcript = TRANSCRIBERS[stt_model].transcribe(audio, lang)
         end_time = time.time()
         click.echo(f"finished in {round(end_time - start_time, 2)} seconds ", nl=False)
 
@@ -95,7 +94,7 @@ def main(
         click.echo("")
         click.echo("Summarizing transcript... ", nl=False)
         start_time = time.time()
-        summary = SUMMARIZE[summary_model](transcript, lang)
+        summary = SUMMARIZERS[summary_model].summarize(transcript, lang)
         end_time = time.time()
         click.echo(f"finished in {round(end_time - start_time, 2)} seconds ", nl=False)
 

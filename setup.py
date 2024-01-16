@@ -16,11 +16,11 @@ setup(
     author_email="max.stolly@gmail.com",
     url="https://github.com/maxstolly/Audio-Summarizer",
     license="Mozilla Public License Version 2.0",
-    py_modules=["audio_summarizer"],
+    py_modules=["main", "config", "transcribers", "summarizers"],
     python_requires=">=3.9",
     install_requires=requirements,
     entry_points="""
         [console_scripts]
-        summarize=audio_summarizer:main
+        summarize=main:main
     """,
 )
