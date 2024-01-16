@@ -23,12 +23,17 @@ def write_output(out_path: str, audio_path: str, text: str, kind: str) -> None:
 
 
 @click.command()
-@click.option("--audio", type=click.Path(), required=True, help="Path to audio file.")
+@click.option(
+    "--audio",
+    type=click.Path(),
+    required=True,
+    help="Path to audio file or in summarize-only mode the path to transcript text.",
+)
 @click.option(
     "--out",
     type=click.Path(),
     required=False,
-    help="Path to optional output file. Note that it will be created if non-existent.",
+    help="Path to optional output file. Note that it will be created if non-existent. If not provided then output will only be printed to the screen.",
 )
 @click.option(
     "--lang",
