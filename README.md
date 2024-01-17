@@ -8,8 +8,8 @@ Requires Python >=3.9. Clone the repository and install from inside the folder u
 
 ## Usage
 
-You can now use `summarize --audio <path> --out <path>` to summarize the speech of an audio file (<25MB) and log the transcript and summary to an output file. For more options see `summarize --help`.
+You can now use `summarize --audio <path> --out <path>` to summarize the speech of an audio file and log the transcript and summary to an output file. For more options see `summarize --help`.
 
-## Development Setup
+## Development
 
-Create virtual environment with `python -m venv .venv`, activate it and install development requirements `python -m pip install -r requirements.txt`. Inside the folder install using `python -m pip install --editable .`. To add a new transcriber or summarizer model add the implementation to their respective folders and the cli option to the dictionary within `__init__.py`.
+Clone the repository. Inside the folder create a virtual environment with `python -m venv .venv` and activate it. Install the module using `python -m pip install --editable .`. To include a new transcriber or summarizer model add the interface to the respective folder and the CLI option to the respective dictionary in `config.py`.
